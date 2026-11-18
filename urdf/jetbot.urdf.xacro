@@ -1,0 +1,176 @@
+<?xml version="1.0"?>
+<robot name="jetbot" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- Maße in Metern (Schätzwerte, später nachmessen) -->
+  <xacro:property name="chassis_l" value="0.14"/>
+  <xacro:property name="chassis_b" value="0.095"/>
+  <xacro:property name="chassis_h" value="0.0372"/>
+
+  <xacro:property name="wheel_r" value="0.03"/>   
+  <xacro:property name="wheel_w" value="0.007"/> 
+
+  <xacro:property name="jetson_l" value="0.12"/>   
+  <xacro:property name="jetson_b" value="0.08"/>   
+  <xacro:property name="jetson_h" value="0.0315"/>  
+
+  <xacro:property name="camerastand_l" value="0.002"/>  
+  <xacro:property name="camerastand_b" value="0.02"/>  
+  <xacro:property name="camerastand_h" value="0.06"/>  
+
+  <xacro:property name="camera_l" value="0.0243"/>  
+  <xacro:property name="camera_b" value="0.027"/>  
+  <xacro:property name="camera_h" value="0.0243"/>  
+
+  <xacro:property name="antenne_r" value="0.0065"/>  
+  <xacro:property name="antenne_w" value="0.05"/>  
+
+  <!-- Farben -->
+  <material name="green">
+    <color rgba="0 0.6 0 1"/>
+  </material>
+
+  <material name="gray">
+    <color rgba="0.24 0.24 0.24 1"/>
+  </material>
+
+  <material name="black">
+    <color rgba="0 0 0 1"/>
+  </material>
+
+  <!-- Bezugspunkt auf dem Boden -->
+  <link name="base_footprint"/>
+
+  <!-- Chassis -->
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <box size="${chassis_l} ${chassis_b} ${chassis_h}"/>
+      </geometry>
+      <material name="green"/>
+    </visual>
+  </link>
+
+  <!--Jetson-->
+  <link name="jetson">
+    <visual>
+      <geometry>
+        <box size="${jetson_l} ${jetson_b} ${jetson_h}"/>
+      </geometry>
+      <material name="black"/>
+    </visual>
+  </link>
+
+  <!--Kamerständer-->
+  <link name="camerastand">
+    <visual>
+      <geometry>
+        <box size="${camerastand_l} ${camerastand_b} ${camerastand_h}"/>
+      </geometry>
+      <material name="green"/>
+    </visual>
+  </link>
+
+  <!--Kamera-->
+  <link name="camera">
+    <visual>
+      <geometry>
+        <box size="${camera_l} ${camera_b} ${camera_h}"/>
+      </geometry>
+      <material name="black"/>
+    </visual>
+  </link>
+
+  <!-- Räder -->
+  <link name="left_wheel">
+    <visual>
+      <origin xyz="0 0 0" rpy="${pi/2} 0 0"/>
+      <geometry>
+        <cylinder radius="${wheel_r}" length="${wheel_w}"/>
+      </geometry>
+      <material name="gray"/>
+    </visual>
+  </link>
+
+  <link name="right_wheel">
+    <visual>
+      <origin xyz="0 0 0" rpy="${pi/2} 0 0"/>
+      <geometry>
+        <cylinder radius="${wheel_r}" length="${wheel_w}"/>
+      </geometry>
+      <material name="gray"/>
+    </visual>
+  </link>
+
+  <!--Antenne-->
+  <link name="left_antenne">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 ${pi/2} 0"/>
+      <geometry>
+        <cylinder radius="${antenne_r}" length="${antenne_w}"/>
+      </geometry>
+      <material name="gray"/>
+    </visual>
+  </link>
+
+  <link name="right_antenne">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 ${pi/2} 0"/>
+      <geometry>
+        <cylinder radius="${antenne_r}" length="${antenne_w}"/>
+      </geometry>
+      <material name="gray"/>
+    </visual>
+  </link>
+
+  <!-- Joints -->
+  <joint name="base_joint" type="fixed">
+    <parent link="base_footprint"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 ${wheel_r}" rpy="0 0 0"/>
+  </joint>
+
+  <joint name="base_jetson" type="fixed">
+    <parent link="base_link"/>
+    <child link="jetson"/>
+    <origin xyz="0 0 ${chassis_h/2 + jetson_h/2}" rpy="0 0 0"/>
+  </joint>
+
+  <joint name="base_camerastand_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="camerastand"/>
+    <origin xyz="${chassis_l/2 - camerastand_l/2} 0 ${+chassis_h/2}" rpy="0 0 0"/>
+  </joint>
+
+  <joint name="camerastand_camera_joint" type="fixed">
+    <parent link="camerastand"/>
+    <child link="camera"/>
+    <origin xyz="${camerastand_l/2 + camera_l/2} 0 ${camerastand_h/2- camera_h/2}" rpy="0 0 0"/>
+  </joint>
+
+  <joint name="left_wheel_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="left_wheel"/>
+    <origin xyz="${chassis_b/4} ${chassis_b/2 + wheel_w/2} 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+  </joint>
+
+  <joint name="right_wheel_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="right_wheel"/>
+    <origin xyz="${chassis_b/4} ${-(chassis_b/2 + wheel_w/2)} 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+  </joint>
+
+   <joint name="left_antenne_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="left_antenne"/>
+    <origin xyz="${-chassis_l/2 + antenne_r} ${(chassis_b/2 - antenne_r)} ${chassis_h/2 + antenne_w/2}" rpy="0 ${pi/2} 0"/>
+  </joint>
+
+  <joint name="right_antenne_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="right_antenne"/>
+    <origin xyz="${-chassis_l/2 + antenne_r} ${-(chassis_b/2 - antenne_r)} ${chassis_h/2 + antenne_w/2}" rpy="0 ${pi/2} 0"/>
+  </joint>
+
+</robot>
