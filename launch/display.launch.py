@@ -1,3 +1,6 @@
+import os
+
+from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.substitutions import Command, PathJoinSubstitution
 from launch_ros.actions import Node
@@ -9,7 +12,16 @@ def generate_launch_description():
     pkg = FindPackageShare('jetbot_digitaltwin')
 
     xacro_file = PathJoinSubstitution([pkg, 'urdf', 'jetbot.urdf.xacro'])
-    robot_description = ParameterValue(Command(['xacro ', xacro_file]), value_type=str)
+
+    # STL-Teile nutzen, falls alle vorhanden – sonst das eigene Box-Modell
+    mesh_dir = os.path.join(get_package_share_directory('jetbot_digitaltwin'), 'meshes')
+    links = ['base_link', 'jetson', 'camerastand', 'camera', 'left_wheel', 'right_wheel',
+             'left_antenne', 'right_antenne']
+    use_mesh = 'true' if all(
+        os.path.isfile(os.path.join(mesh_dir, link + '.stl')) for link in links) else 'false'
+
+    robot_description = ParameterValue(
+        Command(['xacro ', xacro_file, ' use_mesh:=', use_mesh]), value_type=str)
 
     rviz_config = PathJoinSubstitution([pkg, 'rviz', 'jetbot.rviz'])
 
@@ -20,11 +32,11 @@ def generate_launch_description():
         output='screen',
     )
 
-    joint_state_publisher = Node(
-        package='joint_state_publisher',
-        executable='joint_state_publisher',
+    motor_driver = Node(
+        package='jetbot_digitaltwin',
+        executable='motor_driver_node.py',
+        output='screen',
     )
-
     rviz = Node(
         package='rviz2',
         executable='rviz2',
@@ -33,6 +45,6 @@ def generate_launch_description():
 
     return LaunchDescription([
         robot_state_publisher,
-        joint_state_publisher,
+        motor_driver,
         rviz,
     ])

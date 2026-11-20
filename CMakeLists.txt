@@ -4,8 +4,13 @@ project(jetbot_digitaltwin)
 find_package(ament_cmake REQUIRED)
 
 install(
-  DIRECTORY urdf launch rviz
+  DIRECTORY urdf launch rviz meshes
   DESTINATION share/${PROJECT_NAME}
+)
+
+install(
+  PROGRAMS src/motor_driver_node.py
+  DESTINATION lib/${PROJECT_NAME}
 )
 
 ament_package()

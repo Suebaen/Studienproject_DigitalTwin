@@ -1,28 +1,53 @@
 <?xml version="1.0"?>
 <robot name="jetbot" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-  <!-- Maße in Metern (Schätzwerte, später nachmessen) -->
-  <xacro:property name="chassis_l" value="0.14"/>
-  <xacro:property name="chassis_b" value="0.095"/>
-  <xacro:property name="chassis_h" value="0.0372"/>
+ 
+  <xacro:arg name="use_mesh" default="false"/>
+  <xacro:property name="use_mesh" value="$(arg use_mesh)"/>
+  <!-- Quelle: Waveshare "JetBot 3D Drawing" (jetbot.STEP). Mit tools/split_step_freecad.py
+       in ein STL pro Link zerlegt und mit tools/bake_meshes.py ins jeweilige
+       Link-Koordinatensystem umgerechnet (Meter, Ursprung = Link-Ursprung).
+       Nach Änderungen an Maßen/Joints: tools/bake_meshes.py erneut ausführen. -->
+  <xacro:macro name="mesh_visual" params="link material">
+    <xacro:if value="${use_mesh}">
+      <visual>
+        <geometry>
+          <mesh filename="package://jetbot_digitaltwin/meshes/${link}.stl"/>
+        </geometry>
+        <material name="${material}"/>
+      </visual>
+    </xacro:if>
+  </xacro:macro>
 
-  <xacro:property name="wheel_r" value="0.03"/>   
-  <xacro:property name="wheel_w" value="0.007"/> 
+  <!-- Maße in Metern, aus dem Waveshare-CAD-Modell (jetbot.STEP) gemessen -->
+  <xacro:property name="chassis_l" value="0.134"/>
+  <xacro:property name="chassis_b" value="0.096"/>
+  <xacro:property name="chassis_h" value="0.0369"/>
 
-  <xacro:property name="jetson_l" value="0.12"/>   
-  <xacro:property name="jetson_b" value="0.08"/>   
-  <xacro:property name="jetson_h" value="0.0315"/>  
+  <xacro:property name="wheel_r" value="0.0336"/>
+  <xacro:property name="wheel_w" value="0.0151"/>
+  <xacro:property name="wheel_x" value="0.022"/>
+  <xacro:property name="wheel_gap" value="0.0036"/>    
 
-  <xacro:property name="camerastand_l" value="0.002"/>  
-  <xacro:property name="camerastand_b" value="0.02"/>  
-  <xacro:property name="camerastand_h" value="0.06"/>  
+  <xacro:property name="jetson_l" value="0.100"/>
+  <xacro:property name="jetson_b" value="0.0805"/>
+  <xacro:property name="jetson_h" value="0.0302"/>
+  <xacro:property name="jetson_x" value="0.0072"/>     
+  <xacro:property name="jetson_gap" value="0.0279"/>   
 
-  <xacro:property name="camera_l" value="0.0243"/>  
-  <xacro:property name="camera_b" value="0.027"/>  
-  <xacro:property name="camera_h" value="0.0243"/>  
+  <xacro:property name="camerastand_l" value="0.0019"/>
+  <xacro:property name="camerastand_b" value="0.025"/>
+  <xacro:property name="camerastand_h" value="0.0554"/>
+  <xacro:property name="camerastand_x" value="0.0624"/>
 
-  <xacro:property name="antenne_r" value="0.0065"/>  
-  <xacro:property name="antenne_w" value="0.05"/>  
+  <xacro:property name="camera_l" value="0.0209"/>
+  <xacro:property name="camera_b" value="0.025"/>
+  <xacro:property name="camera_h" value="0.0266"/>
+
+  <xacro:property name="antenne_r" value="0.007"/>
+  <xacro:property name="antenne_w" value="0.1855"/>
+  <xacro:property name="antenne_inset" value="0.009"/>
+  <xacro:property name="antenne_gap" value="0.0216"/>
 
   <!-- Farben -->
   <material name="green">
@@ -42,84 +67,108 @@
 
   <!-- Chassis -->
   <link name="base_link">
-    <visual>
-      <geometry>
-        <box size="${chassis_l} ${chassis_b} ${chassis_h}"/>
-      </geometry>
-      <material name="green"/>
-    </visual>
+    <xacro:mesh_visual link="base_link" material="green"/>
+    <xacro:unless value="${use_mesh}">
+      <visual>
+        <geometry>
+          <box size="${chassis_l} ${chassis_b} ${chassis_h}"/>
+        </geometry>
+        <material name="green"/>
+      </visual>
+    </xacro:unless>
   </link>
 
   <!--Jetson-->
   <link name="jetson">
-    <visual>
-      <geometry>
-        <box size="${jetson_l} ${jetson_b} ${jetson_h}"/>
-      </geometry>
-      <material name="black"/>
-    </visual>
+    <xacro:mesh_visual link="jetson" material="black"/>
+    <xacro:unless value="${use_mesh}">
+      <visual>
+        <geometry>
+          <box size="${jetson_l} ${jetson_b} ${jetson_h}"/>
+        </geometry>
+        <material name="black"/>
+      </visual>
+    </xacro:unless>
   </link>
 
   <!--Kamerständer-->
   <link name="camerastand">
-    <visual>
-      <geometry>
-        <box size="${camerastand_l} ${camerastand_b} ${camerastand_h}"/>
-      </geometry>
-      <material name="green"/>
-    </visual>
+    <xacro:mesh_visual link="camerastand" material="green"/>
+    <xacro:unless value="${use_mesh}">
+      <visual>
+        <geometry>
+          <box size="${camerastand_l} ${camerastand_b} ${camerastand_h}"/>
+        </geometry>
+        <material name="green"/>
+      </visual>
+    </xacro:unless>
   </link>
 
   <!--Kamera-->
   <link name="camera">
-    <visual>
-      <geometry>
-        <box size="${camera_l} ${camera_b} ${camera_h}"/>
-      </geometry>
-      <material name="black"/>
-    </visual>
+    <xacro:mesh_visual link="camera" material="black"/>
+    <xacro:unless value="${use_mesh}">
+      <visual>
+        <geometry>
+          <box size="${camera_l} ${camera_b} ${camera_h}"/>
+        </geometry>
+        <material name="black"/>
+      </visual>
+    </xacro:unless>
   </link>
 
   <!-- Räder -->
   <link name="left_wheel">
-    <visual>
-      <origin xyz="0 0 0" rpy="${pi/2} 0 0"/>
-      <geometry>
-        <cylinder radius="${wheel_r}" length="${wheel_w}"/>
-      </geometry>
-      <material name="gray"/>
-    </visual>
+    <xacro:mesh_visual link="left_wheel" material="gray"/>
+    <xacro:unless value="${use_mesh}">
+      <visual>
+        <origin xyz="0 0 0" rpy="${pi/2} 0 0"/>
+        <geometry>
+          <cylinder radius="${wheel_r}" length="${wheel_w}"/>
+        </geometry>
+        <material name="gray"/>
+      </visual>
+    </xacro:unless>
   </link>
 
   <link name="right_wheel">
-    <visual>
-      <origin xyz="0 0 0" rpy="${pi/2} 0 0"/>
-      <geometry>
-        <cylinder radius="${wheel_r}" length="${wheel_w}"/>
-      </geometry>
-      <material name="gray"/>
-    </visual>
+    <xacro:mesh_visual link="right_wheel" material="gray"/>
+    <xacro:unless value="${use_mesh}">
+      <visual>
+        <origin xyz="0 0 0" rpy="${pi/2} 0 0"/>
+        <geometry>
+          <cylinder radius="${wheel_r}" length="${wheel_w}"/>
+        </geometry>
+        <material name="gray"/>
+      </visual>
+    </xacro:unless>
   </link>
 
   <!--Antenne-->
   <link name="left_antenne">
-    <visual>
-      <origin xyz="0 0 0" rpy="0 ${pi/2} 0"/>
-      <geometry>
-        <cylinder radius="${antenne_r}" length="${antenne_w}"/>
-      </geometry>
-      <material name="gray"/>
-    </visual>
+    <xacro:mesh_visual link="left_antenne" material="gray"/>
+    <xacro:unless value="${use_mesh}">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 ${pi/2} 0"/>
+        <geometry>
+          <cylinder radius="${antenne_r}" length="${antenne_w}"/>
+        </geometry>
+        <material name="gray"/>
+      </visual>
+    </xacro:unless>
   </link>
 
   <link name="right_antenne">
-    <visual>
-      <origin xyz="0 0 0" rpy="0 ${pi/2} 0"/>
-      <geometry>
-        <cylinder radius="${antenne_r}" length="${antenne_w}"/>
-      </geometry>
-      <material name="gray"/>
-    </visual>
+    <xacro:mesh_visual link="right_antenne" material="gray"/>
+    <xacro:unless value="${use_mesh}">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 ${pi/2} 0"/>
+        <geometry>
+          <cylinder radius="${antenne_r}" length="${antenne_w}"/>
+        </geometry>
+        <material name="gray"/>
+      </visual>
+    </xacro:unless>
   </link>
 
   <!-- Joints -->
@@ -132,13 +181,13 @@
   <joint name="base_jetson" type="fixed">
     <parent link="base_link"/>
     <child link="jetson"/>
-    <origin xyz="0 0 ${chassis_h/2 + jetson_h/2}" rpy="0 0 0"/>
+    <origin xyz="${jetson_x} 0 ${chassis_h/2 + jetson_gap + jetson_h/2}" rpy="0 0 0"/>
   </joint>
 
   <joint name="base_camerastand_joint" type="fixed">
     <parent link="base_link"/>
     <child link="camerastand"/>
-    <origin xyz="${chassis_l/2 - camerastand_l/2} 0 ${+chassis_h/2}" rpy="0 0 0"/>
+    <origin xyz="${camerastand_x} 0 ${chassis_h/2 + camerastand_h/2}" rpy="0 0 0"/>
   </joint>
 
   <joint name="camerastand_camera_joint" type="fixed">
@@ -150,27 +199,27 @@
   <joint name="left_wheel_joint" type="continuous">
     <parent link="base_link"/>
     <child link="left_wheel"/>
-    <origin xyz="${chassis_b/4} ${chassis_b/2 + wheel_w/2} 0" rpy="0 0 0"/>
+    <origin xyz="${wheel_x} ${chassis_b/2 + wheel_gap + wheel_w/2} 0" rpy="0 0 0"/>
     <axis xyz="0 1 0"/>
   </joint>
 
   <joint name="right_wheel_joint" type="continuous">
     <parent link="base_link"/>
     <child link="right_wheel"/>
-    <origin xyz="${chassis_b/4} ${-(chassis_b/2 + wheel_w/2)} 0" rpy="0 0 0"/>
+    <origin xyz="${wheel_x} ${-(chassis_b/2 + wheel_gap + wheel_w/2)} 0" rpy="0 0 0"/>
     <axis xyz="0 1 0"/>
   </joint>
 
-   <joint name="left_antenne_joint" type="continuous">
+   <joint name="left_antenne_joint" type="fixed">
     <parent link="base_link"/>
     <child link="left_antenne"/>
-    <origin xyz="${-chassis_l/2 + antenne_r} ${(chassis_b/2 - antenne_r)} ${chassis_h/2 + antenne_w/2}" rpy="0 ${pi/2} 0"/>
+    <origin xyz="${-chassis_l/2 + antenne_inset} ${chassis_b/2 - antenne_inset} ${chassis_h/2 + antenne_gap + antenne_w/2}" rpy="0 ${pi/2} 0"/>
   </joint>
 
-  <joint name="right_antenne_joint" type="continuous">
+  <joint name="right_antenne_joint" type="fixed">
     <parent link="base_link"/>
     <child link="right_antenne"/>
-    <origin xyz="${-chassis_l/2 + antenne_r} ${-(chassis_b/2 - antenne_r)} ${chassis_h/2 + antenne_w/2}" rpy="0 ${pi/2} 0"/>
+    <origin xyz="${-chassis_l/2 + antenne_inset} ${-(chassis_b/2 - antenne_inset)} ${chassis_h/2 + antenne_gap + antenne_w/2}" rpy="0 ${pi/2} 0"/>
   </joint>
 
 </robot>
