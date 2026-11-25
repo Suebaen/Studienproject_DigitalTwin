@@ -43,8 +43,16 @@ def generate_launch_description():
         arguments=['-d', rviz_config],
     )
 
+    camera_driver = Node(
+        package='jetbot_digitaltwin',
+        executable='camera_driver_node.py',
+        output='screen',
+        parameters=[{'test_mode': True}]
+    )
+
     return LaunchDescription([
         robot_state_publisher,
         motor_driver,
+        camera_driver,
         rviz,
     ])

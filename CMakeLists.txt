@@ -9,7 +9,9 @@ install(
 )
 
 install(
-  PROGRAMS src/motor_driver_node.py
+  PROGRAMS
+    src/motor_driver_node.py
+    src/camera_driver_node.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
